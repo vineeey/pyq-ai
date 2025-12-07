@@ -1,0 +1,61 @@
+<nav class="fixed top-0 left-0 right-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+            <!-- Logo -->
+            <div class="flex items-center">
+                <a href="{% url 'core:home' %}" class="flex items-center space-x-2">
+                    <i data-lucide="book-open" class="w-8 h-8 text-indigo-600 dark:text-indigo-400"></i>
+                    <span class="text-xl font-bold text-gray-900 dark:text-white">PYQ Analyzer</span>
+                </a>
+            </div>
+            
+            <!-- Navigation Links -->
+            <div class="hidden md:flex items-center space-x-4">
+                {% if user.is_authenticated %}
+                <a href="{% url 'core:dashboard' %}" class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium">
+                    Dashboard
+                </a>
+                <a href="{% url 'subjects:list' %}" class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium">
+                    Subjects
+                </a>
+                {% endif %}
+            </div>
+            
+            <!-- Right side -->
+            <div class="flex items-center space-x-4">
+                <!-- Dark mode toggle -->
+                <button @click="darkMode = !darkMode; localStorage.setItem('darkMode', darkMode)"
+                        class="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                    <i data-lucide="sun" class="w-5 h-5" x-show="darkMode"></i>
+                    <i data-lucide="moon" class="w-5 h-5" x-show="!darkMode"></i>
+                </button>
+                
+                {% if user.is_authenticated %}
+                <!-- User dropdown -->
+                <div x-data="{ open: false }" class="relative">
+                    <button @click="open = !open" class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600">
+                        <span class="text-sm font-medium">{{ user.get_display_name }}</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
+                    <div x-show="open" @click.away="open = false"
+                         class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1">
+                        <a href="{% url 'users:profile' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            Profile
+                        </a>
+                        <a href="{% url 'users:logout' %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            Logout
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <a href="{% url 'users:login' %}" class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
+                    Login
+                </a>
+                <a href="{% url 'users:register' %}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">
+                    Sign Up
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>

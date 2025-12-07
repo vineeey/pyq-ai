@@ -1,0 +1,315 @@
+{% extends 'base/base.html' %}
+{% load core_tags %}
+
+{% block title %}Dashboard - {{ subject.name }} - PYQ Analyzer{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="sm:flex sm:items-center sm:justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ subject.name }} Analytics</h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                {{ subject.code }} • {{ subject.scheme_year }}
+            </p>
+        </div>
+        <div class="mt-4 sm:mt-0 flex space-x-3">
+            <a href="{% url 'reports:analytics_report' subject_pk=subject.pk %}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                <i data-lucide="file-bar-chart" class="w-4 h-4 mr-2"></i>
+                Generate Report
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                    <i data-lucide="file-text" class="w-6 h-6 text-indigo-600 dark:text-indigo-400"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Total Papers</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total_papers|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-lg bg-green-100 dark:bg-green-900/30">
+                    <i data-lucide="help-circle" class="w-6 h-6 text-green-600 dark:text-green-400"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Total Questions</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total_questions|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                    <i data-lucide="copy" class="w-6 h-6 text-purple-600 dark:text-purple-400"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Repeated Questions</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.repeated_questions|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-lg bg-yellow-100 dark:bg-yellow-900/30">
+                    <i data-lucide="percent" class="w-6 h-6 text-yellow-600 dark:text-yellow-400"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Classification Rate</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.classification_rate|default:0 }}%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Module Distribution Chart -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Questions by Module</h2>
+            <div class="h-64">
+                <canvas id="moduleChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Bloom's Taxonomy Chart -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Bloom's Taxonomy Distribution</h2>
+            <div class="h-64">
+                <canvas id="bloomChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Difficulty Distribution Chart -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Difficulty Distribution</h2>
+            <div class="h-64">
+                <canvas id="difficultyChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Year-wise Trend Chart -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Questions per Year</h2>
+            <div class="h-64">
+                <canvas id="yearTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Module Details -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Module-wise Analysis</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for module in module_stats %}
+            <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-medium text-gray-900 dark:text-white">{{ module.name }}</h3>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ module.count }} questions</span>
+                </div>
+                
+                <!-- Coverage Bar -->
+                <div class="mb-3">
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-gray-500 dark:text-gray-400">Coverage</span>
+                        <span class="text-gray-700 dark:text-gray-300">{{ module.percentage }}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div class="bg-indigo-600 h-2 rounded-full" style="width: {{ module.percentage }}%"></div>
+                    </div>
+                </div>
+                
+                <!-- Difficulty Breakdown -->
+                <div class="flex items-center space-x-3 text-xs">
+                    <span class="flex items-center">
+                        <span class="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                        Easy: {{ module.easy|default:0 }}
+                    </span>
+                    <span class="flex items-center">
+                        <span class="w-2 h-2 bg-yellow-500 rounded-full mr-1"></span>
+                        Medium: {{ module.medium|default:0 }}
+                    </span>
+                    <span class="flex items-center">
+                        <span class="w-2 h-2 bg-red-500 rounded-full mr-1"></span>
+                        Hard: {{ module.hard|default:0 }}
+                    </span>
+                </div>
+                
+                {% if module.top_topics %}
+                <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Top Topics:</p>
+                    <div class="flex flex-wrap gap-1">
+                        {% for topic in module.top_topics|slice:":3" %}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
+                            {{ topic.name|truncatechars:20 }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
+                No module data available. Analyze some papers first.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Frequently Repeated Questions -->
+    {% if repeated_questions %}
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <i data-lucide="star" class="w-5 h-5 inline mr-2 text-yellow-500"></i>
+            Frequently Repeated Questions
+        </h2>
+        
+        <div class="space-y-4">
+            {% for cluster in repeated_questions %}
+            <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 mr-2">
+                                {{ cluster.question_count }}x repeated
+                            </span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">
+                                Appeared in: {{ cluster.years_appeared|join:", " }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-800 dark:text-gray-200">{{ cluster.representative_text|truncatechars:200 }}</p>
+                    </div>
+                    <a href="{% url 'questions:list' %}?cluster={{ cluster.id }}" class="ml-4 text-indigo-600 hover:text-indigo-800 dark:text-indigo-400">
+                        <i data-lucide="external-link" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="mt-4 text-center">
+            <a href="{% url 'questions:list' %}?subject={{ subject.id }}&duplicates=true" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 text-sm">
+                View all repeated questions →
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const isDark = document.documentElement.classList.contains('dark');
+    const textColor = isDark ? '#9CA3AF' : '#6B7280';
+    
+    Chart.defaults.color = textColor;
+    
+    // Module Distribution Chart
+    new Chart(document.getElementById('moduleChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ module_labels|safe }},
+            datasets: [{
+                label: 'Questions',
+                data: {{ module_data|safe }},
+                backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                borderColor: 'rgb(99, 102, 241)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+    
+    // Bloom's Taxonomy Chart
+    new Chart(document.getElementById('bloomChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'],
+            datasets: [{
+                data: {{ bloom_data|safe }},
+                backgroundColor: [
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(249, 115, 22, 0.8)',
+                    'rgba(234, 179, 8, 0.8)',
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(168, 85, 247, 0.8)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+    
+    // Difficulty Chart
+    new Chart(document.getElementById('difficultyChart'), {
+        type: 'pie',
+        data: {
+            labels: ['Easy', 'Medium', 'Hard'],
+            datasets: [{
+                data: {{ difficulty_data|safe }},
+                backgroundColor: [
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(234, 179, 8, 0.8)',
+                    'rgba(239, 68, 68, 0.8)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+    
+    // Year Trend Chart
+    new Chart(document.getElementById('yearTrendChart'), {
+        type: 'line',
+        data: {
+            labels: {{ year_labels|safe }},
+            datasets: [{
+                label: 'Questions',
+                data: {{ year_data|safe }},
+                borderColor: 'rgb(99, 102, 241)',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

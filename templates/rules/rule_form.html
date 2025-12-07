@@ -1,0 +1,226 @@
+{% extends 'base/base.html' %}
+{% load core_tags %}
+
+{% block title %}{% if rule %}Edit Rule{% else %}Create Rule{% endif %} - PYQ Analyzer{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <nav class="flex mb-4" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="{% url 'subjects:detail' subject.id %}" class="text-gray-500 hover:text-gray-700 dark:text-gray-400">
+                        {{ subject.code }}
+                    </a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                        <a href="{% url 'rules:list' subject.id %}" class="ml-1 text-gray-500 hover:text-gray-700 dark:text-gray-400">Rules</a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                        <span class="ml-1 text-sm font-medium text-gray-700 dark:text-gray-300">{% if rule %}Edit{% else %}Create{% endif %}</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{% if rule %}Edit Rule{% else %}Create Classification Rule{% endif %}</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Define rules in plain English to automatically classify questions
+        </p>
+    </div>
+
+    <!-- Form -->
+    <form method="post" class="space-y-6" x-data="ruleForm()">
+        {% csrf_token %}
+        
+        <!-- Basic Info -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Rule Information</h2>
+            
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="id_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Rule Name <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="name" id="id_name" 
+                               value="{{ rule.name|default:'' }}"
+                               placeholder="e.g., Module 1 Questions"
+                               class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                               required>
+                    </div>
+                    <div>
+                        <label for="id_priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Priority
+                        </label>
+                        <input type="number" name="priority" id="id_priority" min="1" max="1000"
+                               value="{{ rule.priority|default:100 }}"
+                               class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Lower number = higher priority</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="id_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Description
+                    </label>
+                    <input type="text" name="description" id="id_description" 
+                           value="{{ rule.description|default:'' }}"
+                           placeholder="Optional description of what this rule does"
+                           class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+            </div>
+        </div>
+
+        <!-- Rule Definition -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                <i data-lucide="edit-3" class="w-5 h-5 inline mr-2"></i>
+                Rule Definition
+            </h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="id_rule_text" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Rule in Plain English <span class="text-red-500">*</span>
+                    </label>
+                    <textarea name="rule_text" id="id_rule_text" rows="4" required
+                              x-model="ruleText"
+                              placeholder="Examples:
+• Questions 1-5 belong to Module 1
+• Questions containing 'Fourier transform' or 'Laplace' belong to Module 3
+• 2-mark questions from Part A belong to Module 1"
+                              class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 font-mono text-sm">{{ rule.rule_text|default:'' }}</textarea>
+                </div>
+                
+                <!-- Example Rules -->
+                <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                    <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Example Rules</h3>
+                    <div class="space-y-2 text-sm">
+                        <button type="button" @click="ruleText = 'Questions 1 to 5 belong to Module 1'" class="block text-left w-full px-3 py-2 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600 text-gray-600 dark:text-gray-400">
+                            Questions 1 to 5 belong to Module 1
+                        </button>
+                        <button type="button" @click="ruleText = 'Questions containing \"algorithm\" or \"complexity\" belong to Module 2'" class="block text-left w-full px-3 py-2 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600 text-gray-600 dark:text-gray-400">
+                            Questions containing "algorithm" or "complexity" belong to Module 2
+                        </button>
+                        <button type="button" @click="ruleText = 'Part A questions belong to Module 1, Part B questions belong to Module 2'" class="block text-left w-full px-3 py-2 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600 text-gray-600 dark:text-gray-400">
+                            Part A questions belong to Module 1, Part B questions belong to Module 2
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Module Reference -->
+                <div>
+                    <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Available Modules</h3>
+                    <div class="flex flex-wrap gap-2">
+                        {% for i in module_range %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300">
+                            Module {{ i }}{% if module_names %}: {{ module_names|get_item:i }}{% endif %}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Rule -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                <i data-lucide="play" class="w-5 h-5 inline mr-2"></i>
+                Test Rule
+            </h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Test Question
+                    </label>
+                    <textarea id="test_question" rows="2" x-model="testQuestion"
+                              placeholder="Enter a question to test the rule against..."
+                              class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button type="button" 
+                            @click="testRule()"
+                            class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <i data-lucide="play" class="w-4 h-4 mr-2"></i>
+                        Test Rule
+                    </button>
+                    <div x-show="testResult" x-cloak>
+                        <span x-show="testResult === 'match'" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                            <i data-lucide="check" class="w-4 h-4 mr-1"></i>
+                            Rule matches!
+                        </span>
+                        <span x-show="testResult === 'no-match'" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                            <i data-lucide="x" class="w-4 h-4 mr-1"></i>
+                            No match
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Options -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <input type="checkbox" name="is_enabled" id="id_is_enabled" 
+                           {% if rule.is_enabled or not rule %}checked{% endif %}
+                           class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700">
+                    <label for="id_is_enabled" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Enable this rule
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="flex justify-end space-x-4">
+            <a href="{% url 'rules:list' subject.id %}" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                Cancel
+            </a>
+            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                {% if rule %}Save Changes{% else %}Create Rule{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+function ruleForm() {
+    return {
+        ruleText: '{{ rule.rule_text|default:""|escapejs }}',
+        testQuestion: '',
+        testResult: null,
+        
+        testRule() {
+            // Simple client-side test simulation
+            if (!this.ruleText || !this.testQuestion) {
+                alert('Please enter both a rule and a test question');
+                return;
+            }
+            
+            // Check for keyword matches
+            const keywords = this.ruleText.match(/"([^"]+)"/g);
+            if (keywords) {
+                const matched = keywords.some(kw => {
+                    const word = kw.replace(/"/g, '').toLowerCase();
+                    return this.testQuestion.toLowerCase().includes(word);
+                });
+                this.testResult = matched ? 'match' : 'no-match';
+            } else {
+                // Simple heuristic
+                this.testResult = 'no-match';
+            }
+        }
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,65 @@
+{# Form Field Component #}
+{# Usage: {% include 'components/form_field.html' with field=form.email %} #}
+
+{% load core_tags %}
+
+<div class="{% if not inline %}mb-4{% endif %} {{ class }}">
+    {% if field.label and not hide_label %}
+    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        {{ field.label }}
+        {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+    </label>
+    {% endif %}
+    
+    {% if field.field.widget.input_type == 'checkbox' %}
+    <div class="flex items-center">
+        {{ field }}
+        <label for="{{ field.id_for_label }}" class="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+            {{ field.label }}
+        </label>
+    </div>
+    {% elif field.field.widget.input_type == 'file' %}
+    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg hover:border-indigo-500 transition-colors"
+         x-data="{ dragover: false }"
+         x-on:dragover.prevent="dragover = true"
+         x-on:dragleave.prevent="dragover = false"
+         x-on:drop.prevent="dragover = false"
+         :class="{ 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20': dragover }">
+        <div class="space-y-1 text-center">
+            <i data-lucide="upload-cloud" class="mx-auto h-12 w-12 text-gray-400"></i>
+            <div class="flex text-sm text-gray-600 dark:text-gray-400">
+                <label for="{{ field.id_for_label }}" class="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
+                    <span>Upload a file</span>
+                    {{ field }}
+                </label>
+                <p class="pl-1">or drag and drop</p>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-500">{{ help_text|default:"PDF up to 10MB" }}</p>
+        </div>
+    </div>
+    {% else %}
+    <div class="relative">
+        {% if icon %}
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i data-lucide="{{ icon }}" class="h-5 w-5 text-gray-400"></i>
+        </div>
+        {% endif %}
+        {{ field }}
+    </div>
+    {% endif %}
+    
+    {% if field.help_text and not hide_help %}
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.help_text }}</p>
+    {% endif %}
+    
+    {% if field.errors %}
+    <ul class="mt-1 text-sm text-red-600 dark:text-red-400">
+        {% for error in field.errors %}
+        <li class="flex items-center">
+            <i data-lucide="alert-circle" class="w-4 h-4 mr-1"></i>
+            {{ error }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>

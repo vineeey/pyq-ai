@@ -1,0 +1,83 @@
+{# Stats Card Component #}
+{# Usage: {% include 'components/stats_card.html' with title="Total Papers" value="42" icon="file-text" %} #}
+
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 {{ class }}">
+    <div class="flex items-center">
+        {% if icon %}
+        <div class="flex-shrink-0">
+            <div class="p-3 rounded-full 
+                {% if variant == 'success' %}bg-green-100 dark:bg-green-900/30{% endif %}
+                {% if variant == 'danger' %}bg-red-100 dark:bg-red-900/30{% endif %}
+                {% if variant == 'warning' %}bg-yellow-100 dark:bg-yellow-900/30{% endif %}
+                {% if variant == 'info' %}bg-blue-100 dark:bg-blue-900/30{% endif %}
+                {% if not variant or variant == 'primary' %}bg-indigo-100 dark:bg-indigo-900/30{% endif %}
+            ">
+                <i data-lucide="{{ icon }}" class="h-6 w-6 
+                    {% if variant == 'success' %}text-green-600 dark:text-green-400{% endif %}
+                    {% if variant == 'danger' %}text-red-600 dark:text-red-400{% endif %}
+                    {% if variant == 'warning' %}text-yellow-600 dark:text-yellow-400{% endif %}
+                    {% if variant == 'info' %}text-blue-600 dark:text-blue-400{% endif %}
+                    {% if not variant or variant == 'primary' %}text-indigo-600 dark:text-indigo-400{% endif %}
+                "></i>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="{% if icon %}ml-5{% endif %} w-0 flex-1">
+            <dl>
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                    {{ title }}
+                </dt>
+                <dd class="flex items-baseline">
+                    <div class="text-2xl font-semibold text-gray-900 dark:text-white">
+                        {{ value }}
+                    </div>
+                    
+                    {% if change %}
+                    <div class="ml-2 flex items-baseline text-sm font-semibold 
+                        {% if change_type == 'increase' %}text-green-600 dark:text-green-400{% endif %}
+                        {% if change_type == 'decrease' %}text-red-600 dark:text-red-400{% endif %}
+                    ">
+                        <i data-lucide="{% if change_type == 'increase' %}trending-up{% else %}trending-down{% endif %}" class="h-4 w-4 mr-1"></i>
+                        {{ change }}
+                    </div>
+                    {% endif %}
+                </dd>
+                
+                {% if subtitle %}
+                <dd class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    {{ subtitle }}
+                </dd>
+                {% endif %}
+            </dl>
+        </div>
+        
+        {% if action_url %}
+        <div class="flex-shrink-0">
+            <a href="{{ action_url }}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300">
+                <i data-lucide="arrow-right" class="h-5 w-5"></i>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if progress %}
+    <div class="mt-4">
+        <div class="flex justify-between text-sm mb-1">
+            <span class="text-gray-500 dark:text-gray-400">{{ progress_label|default:"Progress" }}</span>
+            <span class="text-gray-700 dark:text-gray-300">{{ progress }}%</span>
+        </div>
+        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+            <div class="h-2 rounded-full 
+                {% if variant == 'success' %}bg-green-600{% endif %}
+                {% if variant == 'danger' %}bg-red-600{% endif %}
+                {% if variant == 'warning' %}bg-yellow-500{% endif %}
+                {% if variant == 'info' %}bg-blue-600{% endif %}
+                {% if not variant or variant == 'primary' %}bg-indigo-600{% endif %}
+            " style="width: {{ progress }}%"></div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {{ content }}
+</div>

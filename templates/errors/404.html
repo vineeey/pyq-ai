@@ -1,0 +1,36 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Page Not Found - PYQ Analyzer{% endblock %}
+
+{% block content %}
+<div class="min-h-[60vh] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div class="text-center">
+        <div class="mb-8">
+            <span class="text-9xl font-bold text-indigo-600 dark:text-indigo-400">404</span>
+        </div>
+        
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Page Not Found</h1>
+        <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+            Sorry, we couldn't find the page you're looking for. It might have been moved or deleted.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'core:home' %}" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm">
+                <i data-lucide="home" class="w-5 h-5 mr-2"></i>
+                Go Home
+            </a>
+            <a href="{% url 'core:dashboard' %}" class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-2"></i>
+                Dashboard
+            </a>
+        </div>
+        
+        <div class="mt-8">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                If you think this is a mistake, please 
+                <a href="mailto:support@example.com" class="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">contact support</a>.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

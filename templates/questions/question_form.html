@@ -1,0 +1,230 @@
+{% extends 'base/base.html' %}
+{% load core_tags %}
+
+{% block title %}Edit Q{{ question.question_number }} - PYQ Analyzer{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <nav class="flex mb-4" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="{% url 'questions:list' %}" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                        <i data-lucide="help-circle" class="w-4 h-4 mr-2"></i>
+                        Questions
+                    </a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                        <a href="{% url 'questions:detail' question.id %}" class="ml-1 text-gray-500 hover:text-gray-700 dark:text-gray-400">Q{{ question.question_number }}</a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                        <span class="ml-1 text-sm font-medium text-gray-700 dark:text-gray-300">Edit</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Edit Question</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            {{ question.paper.subject.name }} • {{ question.paper.year_label }}
+        </p>
+    </div>
+
+    <!-- Edit Form -->
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- Question Text -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Question Content</h2>
+            
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label for="id_question_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Question Number
+                        </label>
+                        <input type="text" name="question_number" id="id_question_number" 
+                               value="{{ question.question_number }}"
+                               class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label for="id_part" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Part
+                        </label>
+                        <input type="text" name="part" id="id_part" 
+                               value="{{ question.part }}"
+                               placeholder="e.g., A, B"
+                               class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label for="id_marks" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Marks
+                        </label>
+                        <input type="number" name="marks" id="id_marks" step="0.5"
+                               value="{{ question.marks }}"
+                               class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="id_question_text" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Question Text <span class="text-red-500">*</span>
+                    </label>
+                    <textarea name="question_text" id="id_question_text" rows="6" required
+                              class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ question.question_text }}</textarea>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center">
+                        <input type="checkbox" name="has_diagram" id="id_has_diagram" 
+                               {% if question.has_diagram %}checked{% endif %}
+                               class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700">
+                        <label for="id_has_diagram" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Has Diagram</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" name="has_table" id="id_has_table" 
+                               {% if question.has_table %}checked{% endif %}
+                               class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700">
+                        <label for="id_has_table" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Has Table</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" name="has_equation" id="id_has_equation" 
+                               {% if question.has_equation %}checked{% endif %}
+                               class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700">
+                        <label for="id_has_equation" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Has Equation</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Classification -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Classification</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="id_module_final" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Module
+                    </label>
+                    <select name="module_final" id="id_module_final"
+                            class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">Unclassified</option>
+                        {% for i in module_range %}
+                        <option value="{{ i }}" {% if question.module_final == i %}selected{% endif %}>
+                            Module {{ i }}{% if module_names %} - {{ module_names|get_item:i }}{% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="id_topic_primary" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Primary Topic
+                    </label>
+                    <input type="text" name="topic_primary" id="id_topic_primary" 
+                           value="{{ question.topic_primary }}"
+                           class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+                
+                <div>
+                    <label for="id_bloom_level" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Bloom's Taxonomy Level
+                    </label>
+                    <select name="bloom_level" id="id_bloom_level"
+                            class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">Not Set</option>
+                        <option value="remember" {% if question.bloom_level == 'remember' %}selected{% endif %}>Remember</option>
+                        <option value="understand" {% if question.bloom_level == 'understand' %}selected{% endif %}>Understand</option>
+                        <option value="apply" {% if question.bloom_level == 'apply' %}selected{% endif %}>Apply</option>
+                        <option value="analyze" {% if question.bloom_level == 'analyze' %}selected{% endif %}>Analyze</option>
+                        <option value="evaluate" {% if question.bloom_level == 'evaluate' %}selected{% endif %}>Evaluate</option>
+                        <option value="create" {% if question.bloom_level == 'create' %}selected{% endif %}>Create</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="id_difficulty" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Difficulty
+                    </label>
+                    <select name="difficulty" id="id_difficulty"
+                            class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">Not Set</option>
+                        <option value="easy" {% if question.difficulty == 'easy' %}selected{% endif %}>Easy</option>
+                        <option value="medium" {% if question.difficulty == 'medium' %}selected{% endif %}>Medium</option>
+                        <option value="hard" {% if question.difficulty == 'hard' %}selected{% endif %}>Hard</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mt-4 flex items-center">
+                <input type="checkbox" name="is_manually_verified" id="id_is_manually_verified"
+                       {% if question.is_manually_verified %}checked{% endif %}
+                       class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700">
+                <label for="id_is_manually_verified" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    Mark as manually verified
+                </label>
+            </div>
+        </div>
+
+        <!-- AI Classification Info (Read Only) -->
+        {% if question.module_by_ai or question.ai_reasoning %}
+        <div class="bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                <i data-lucide="brain" class="w-5 h-5 inline mr-2"></i>
+                AI Classification (Reference)
+            </h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                {% if question.module_by_ai %}
+                <div>
+                    <p class="text-gray-500 dark:text-gray-400">AI Suggested Module</p>
+                    <p class="font-medium text-gray-900 dark:text-white">Module {{ question.module_by_ai }}</p>
+                    {% if question.ai_confidence %}
+                    <p class="text-xs text-gray-500">{{ question.ai_confidence|floatformat:0 }}% confidence</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% if question.module_by_rule %}
+                <div>
+                    <p class="text-gray-500 dark:text-gray-400">Rule-based Module</p>
+                    <p class="font-medium text-gray-900 dark:text-white">Module {{ question.module_by_rule }}</p>
+                </div>
+                {% endif %}
+                {% if question.module_by_pattern %}
+                <div>
+                    <p class="text-gray-500 dark:text-gray-400">Pattern-based Module</p>
+                    <p class="font-medium text-gray-900 dark:text-white">Module {{ question.module_by_pattern }}</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if question.ai_reasoning %}
+            <div class="mt-4">
+                <p class="text-gray-500 dark:text-gray-400 text-sm mb-1">AI Reasoning</p>
+                <p class="text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 rounded p-3">
+                    {{ question.ai_reasoning }}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Submit -->
+        <div class="flex justify-end space-x-4">
+            <a href="{% url 'questions:detail' question.id %}" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                Cancel
+            </a>
+            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

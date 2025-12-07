@@ -1,0 +1,33 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Delete Paper - PYQ Analyzer{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="alert-triangle" class="w-8 h-8 text-red-600 dark:text-red-400"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Delete Paper</h2>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">
+                Are you sure you want to delete <strong>{{ paper.title }}</strong>?
+            </p>
+        </div>
+        
+        <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
+            <p class="text-red-700 dark:text-red-300 text-sm">
+                <strong>Warning:</strong> This will also delete all extracted questions and analysis results.
+            </p>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="flex justify-center space-x-4">
+                <a href="{% url 'papers:detail' paper.pk %}" class="btn-secondary">Cancel</a>
+                <button type="submit" class="btn-danger">Delete Paper</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

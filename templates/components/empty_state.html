@@ -1,0 +1,43 @@
+{# Empty State Component #}
+{# Usage: {% include 'components/empty_state.html' with icon="inbox" title="No items" %} #}
+
+<div class="text-center py-12 {{ class }}">
+    {% if icon %}
+    <div class="mx-auto h-24 w-24 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-6">
+        <i data-lucide="{{ icon }}" class="h-12 w-12 text-gray-400 dark:text-gray-500"></i>
+    </div>
+    {% elif image %}
+    <img src="{{ image }}" alt="" class="mx-auto h-32 w-32 mb-6">
+    {% endif %}
+    
+    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
+        {{ title|default:"No items found" }}
+    </h3>
+    
+    {% if description %}
+    <p class="text-gray-500 dark:text-gray-400 max-w-sm mx-auto mb-6">
+        {{ description }}
+    </p>
+    {% endif %}
+    
+    {% if action_url %}
+    <a 
+        href="{{ action_url }}"
+        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+    >
+        {% if action_icon %}<i data-lucide="{{ action_icon }}" class="w-4 h-4 mr-2"></i>{% endif %}
+        {{ action_text|default:"Get started" }}
+    </a>
+    {% endif %}
+    
+    {% if secondary_action_url %}
+    <a 
+        href="{{ secondary_action_url }}"
+        class="ml-3 inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+    >
+        {{ secondary_action_text }}
+    </a>
+    {% endif %}
+    
+    {{ content }}
+</div>

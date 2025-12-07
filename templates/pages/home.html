@@ -1,0 +1,98 @@
+{% extends 'base/base.html' %}
+
+{% block title %}PYQ Analyzer - AI-Powered Question Paper Analysis{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
+    <!-- Hero Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
+        <div class="text-center">
+            <h1 class="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+                Analyze Question Papers
+                <span class="text-indigo-600 dark:text-indigo-400">with AI</span>
+            </h1>
+            <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
+                Upload your previous year question papers and get instant AI-powered analysis.
+                Module classification, duplicate detection, difficulty assessment, and beautiful reports.
+                <strong>100% free, 100% local.</strong>
+            </p>
+            <div class="flex justify-center space-x-4">
+                {% if user.is_authenticated %}
+                <a href="{% url 'core:dashboard' %}" class="bg-indigo-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-indigo-700 transition">
+                    Go to Dashboard
+                </a>
+                {% else %}
+                <a href="{% url 'users:register' %}" class="bg-indigo-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-indigo-700 transition">
+                    Get Started Free
+                </a>
+                <a href="{% url 'users:login' %}" class="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-8 py-3 rounded-lg text-lg font-semibold border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                    Login
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Features Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <h2 class="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
+            Powerful Features
+        </h2>
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-lg flex items-center justify-center mb-4">
+                    <i data-lucide="upload" class="w-6 h-6 text-indigo-600 dark:text-indigo-400"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">PDF Upload</h3>
+                <p class="text-gray-600 dark:text-gray-300">Upload question papers in PDF format. Automatic text extraction with OCR support.</p>
+            </div>
+            
+            <!-- Feature 2 -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-4">
+                    <i data-lucide="brain" class="w-6 h-6 text-green-600 dark:text-green-400"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">AI Classification</h3>
+                <p class="text-gray-600 dark:text-gray-300">Automatic module mapping, topic detection, and Bloom's taxonomy classification.</p>
+            </div>
+            
+            <!-- Feature 3 -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mb-4">
+                    <i data-lucide="copy" class="w-6 h-6 text-purple-600 dark:text-purple-400"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Duplicate Detection</h3>
+                <p class="text-gray-600 dark:text-gray-300">Find repeated questions across years using advanced embedding similarity.</p>
+            </div>
+            
+            <!-- Feature 4 -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center mb-4">
+                    <i data-lucide="bar-chart-3" class="w-6 h-6 text-yellow-600 dark:text-yellow-400"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Analytics Dashboard</h3>
+                <p class="text-gray-600 dark:text-gray-300">Beautiful charts showing module distribution, difficulty trends, and more.</p>
+            </div>
+            
+            <!-- Feature 5 -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                <div class="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center mb-4">
+                    <i data-lucide="file-text" class="w-6 h-6 text-red-600 dark:text-red-400"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">PDF Reports</h3>
+                <p class="text-gray-600 dark:text-gray-300">Generate professional module-wise reports for exam preparation.</p>
+            </div>
+            
+            <!-- Feature 6 -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4">
+                    <i data-lucide="shield-check" class="w-6 h-6 text-blue-600 dark:text-blue-400"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">100% Private</h3>
+                <p class="text-gray-600 dark:text-gray-300">All processing happens locally. Your data never leaves your computer.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

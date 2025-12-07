@@ -1,0 +1,59 @@
+{# Dropdown Component #}
+{# Usage: {% include 'components/dropdown.html' with trigger="Options" items=dropdown_items %} #}
+
+<div class="relative inline-block text-left" x-data="{ open: false }">
+    <div>
+        <button 
+            type="button" 
+            @click="open = !open"
+            class="inline-flex items-center justify-center w-full rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 {{ trigger_class }}"
+            aria-expanded="true"
+            aria-haspopup="true"
+        >
+            {% if trigger_icon %}<i data-lucide="{{ trigger_icon }}" class="w-4 h-4 mr-2"></i>{% endif %}
+            {{ trigger }}
+            <i data-lucide="chevron-down" class="w-4 h-4 ml-2 -mr-1"></i>
+        </button>
+    </div>
+
+    <div
+        x-show="open"
+        x-cloak
+        x-transition:enter="transition ease-out duration-100"
+        x-transition:enter-start="transform opacity-0 scale-95"
+        x-transition:enter-end="transform opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-75"
+        x-transition:leave-start="transform opacity-100 scale-100"
+        x-transition:leave-end="transform opacity-0 scale-95"
+        @click.away="open = false"
+        class="origin-top-right absolute {% if align == 'left' %}left-0{% else %}right-0{% endif %} mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50 {{ menu_class }}"
+        role="menu"
+        aria-orientation="vertical"
+    >
+        <div class="py-1" role="none">
+            {{ content }}
+            
+            {% for item in items %}
+                {% if item.divider %}
+                <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                {% elif item.header %}
+                <div class="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ item.header }}</div>
+                {% else %}
+                <a 
+                    href="{{ item.url|default:'#' }}"
+                    {% if item.hx_get %}hx-get="{{ item.hx_get }}"{% endif %}
+                    {% if item.hx_post %}hx-post="{{ item.hx_post }}"{% endif %}
+                    {% if item.hx_delete %}hx-delete="{{ item.hx_delete }}"{% endif %}
+                    {% if item.hx_confirm %}hx-confirm="{{ item.hx_confirm }}"{% endif %}
+                    @click="open = false"
+                    class="{% if item.danger %}text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %} group flex items-center px-4 py-2 text-sm {{ item.class }}"
+                    role="menuitem"
+                >
+                    {% if item.icon %}<i data-lucide="{{ item.icon }}" class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-400"></i>{% endif %}
+                    {{ item.label }}
+                </a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>

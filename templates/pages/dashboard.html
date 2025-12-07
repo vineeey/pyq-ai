@@ -1,0 +1,74 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Dashboard - PYQ Analyzer{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-1">Welcome back, {{ user.get_display_name }}!</p>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="grid md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Total Subjects</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ total_subjects }}</p>
+                </div>
+                <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-lg flex items-center justify-center">
+                    <i data-lucide="book" class="w-6 h-6 text-indigo-600 dark:text-indigo-400"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Papers Uploaded</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ total_papers }}</p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                    <i data-lucide="file-text" class="w-6 h-6 text-green-600 dark:text-green-400"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Questions Analyzed</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ total_questions }}</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                    <i data-lucide="help-circle" class="w-6 h-6 text-purple-600 dark:text-purple-400"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <a href="{% url 'subjects:create' %}" class="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition">
+                <i data-lucide="plus" class="w-5 h-5 text-indigo-600 dark:text-indigo-400 mr-3"></i>
+                <span class="text-gray-700 dark:text-gray-300">Create Subject</span>
+            </a>
+            <a href="{% url 'subjects:list' %}" class="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition">
+                <i data-lucide="list" class="w-5 h-5 text-green-600 dark:text-green-400 mr-3"></i>
+                <span class="text-gray-700 dark:text-gray-300">View Subjects</span>
+            </a>
+            <a href="{% url 'questions:list' %}" class="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition">
+                <i data-lucide="search" class="w-5 h-5 text-purple-600 dark:text-purple-400 mr-3"></i>
+                <span class="text-gray-700 dark:text-gray-300">Browse Questions</span>
+            </a>
+            <a href="{% url 'users:profile' %}" class="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition">
+                <i data-lucide="settings" class="w-5 h-5 text-gray-600 dark:text-gray-400 mr-3"></i>
+                <span class="text-gray-700 dark:text-gray-300">Settings</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

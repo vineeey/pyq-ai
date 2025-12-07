@@ -1,0 +1,35 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Server Error - PYQ Analyzer{% endblock %}
+
+{% block content %}
+<div class="min-h-[60vh] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div class="text-center">
+        <div class="mb-8">
+            <span class="text-9xl font-bold text-red-600 dark:text-red-400">500</span>
+        </div>
+        
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Server Error</h1>
+        <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+            Oops! Something went wrong on our end. We've been notified and are working to fix it.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'core:home' %}" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm">
+                <i data-lucide="home" class="w-5 h-5 mr-2"></i>
+                Go Home
+            </a>
+            <button onclick="location.reload()" class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <i data-lucide="refresh-cw" class="w-5 h-5 mr-2"></i>
+                Try Again
+            </button>
+        </div>
+        
+        <div class="mt-8">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                Error reference: <code class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{{ request_id|default:"N/A" }}</code>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

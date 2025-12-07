@@ -1,0 +1,91 @@
+{# Skeleton Loading Component #}
+{# Usage: {% include 'components/skeleton.html' with type="card" %} #}
+
+{% with type=type|default:"text" %}
+<div class="animate-pulse {{ class }}">
+    {% if type == 'text' %}
+    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-{{ width|default:'3/4' }}"></div>
+    
+    {% elif type == 'text-block' %}
+    <div class="space-y-3">
+        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/6"></div>
+    </div>
+    
+    {% elif type == 'avatar' %}
+    <div class="rounded-full bg-gray-200 dark:bg-gray-700 
+        {% if size == 'sm' %}h-8 w-8{% endif %}
+        {% if size == 'md' or not size %}h-10 w-10{% endif %}
+        {% if size == 'lg' %}h-12 w-12{% endif %}
+        {% if size == 'xl' %}h-16 w-16{% endif %}
+    "></div>
+    
+    {% elif type == 'card' %}
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+        <div class="flex items-center space-x-4">
+            <div class="rounded-full bg-gray-200 dark:bg-gray-700 h-12 w-12"></div>
+            <div class="flex-1 space-y-2">
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+            </div>
+        </div>
+        <div class="mt-4 space-y-3">
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+        </div>
+    </div>
+    
+    {% elif type == 'table-row' %}
+    <tr>
+        {% for i in "12345" %}
+        <td class="px-6 py-4">
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-{{ widths|default:'full' }}"></div>
+        </td>
+        {% endfor %}
+    </tr>
+    
+    {% elif type == 'list-item' %}
+    <div class="flex items-center space-x-4 py-3">
+        <div class="rounded bg-gray-200 dark:bg-gray-700 h-10 w-10"></div>
+        <div class="flex-1 space-y-2">
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+        </div>
+    </div>
+    
+    {% elif type == 'image' %}
+    <div class="bg-gray-200 dark:bg-gray-700 rounded-lg 
+        {% if aspect == 'video' %}aspect-video{% endif %}
+        {% if aspect == 'square' %}aspect-square{% endif %}
+        {% if not aspect %}h-48{% endif %}
+    ">
+        <div class="flex items-center justify-center h-full">
+            <i data-lucide="image" class="w-10 h-10 text-gray-400"></i>
+        </div>
+    </div>
+    
+    {% elif type == 'stats' %}
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
+        <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+    </div>
+    
+    {% elif type == 'form' %}
+    <div class="space-y-4">
+        <div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-2"></div>
+            <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        </div>
+        <div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-2"></div>
+            <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        </div>
+        <div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-2"></div>
+            <div class="h-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endwith %}

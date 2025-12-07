@@ -1,0 +1,50 @@
+{# HTMX Partial: Module Stats Card #}
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+    <div class="flex items-center justify-between mb-3">
+        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ module.name }}</h4>
+        <span class="text-xs text-gray-500 dark:text-gray-400">{{ module.question_count }} questions</span>
+    </div>
+    
+    <div class="space-y-2">
+        <!-- Question Distribution -->
+        <div>
+            <div class="flex justify-between text-xs mb-1">
+                <span class="text-gray-500 dark:text-gray-400">Coverage</span>
+                <span class="text-gray-700 dark:text-gray-300">{{ module.coverage_percentage }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                <div class="bg-indigo-600 h-1.5 rounded-full" style="width: {{ module.coverage_percentage }}%"></div>
+            </div>
+        </div>
+        
+        <!-- Difficulty Breakdown -->
+        <div class="flex items-center space-x-2 text-xs">
+            <span class="flex items-center">
+                <span class="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                {{ module.easy_count|default:0 }}
+            </span>
+            <span class="flex items-center">
+                <span class="w-2 h-2 bg-yellow-500 rounded-full mr-1"></span>
+                {{ module.medium_count|default:0 }}
+            </span>
+            <span class="flex items-center">
+                <span class="w-2 h-2 bg-red-500 rounded-full mr-1"></span>
+                {{ module.hard_count|default:0 }}
+            </span>
+        </div>
+        
+        <!-- Top Topics -->
+        {% if module.top_topics %}
+        <div class="pt-2 border-t border-gray-100 dark:border-gray-700">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Top Topics:</p>
+            <div class="flex flex-wrap gap-1">
+                {% for topic in module.top_topics|slice:":3" %}
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+                    {{ topic|truncatechars:15 }}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>

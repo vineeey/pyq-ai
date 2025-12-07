@@ -1,0 +1,170 @@
+{% extends 'base/base.html' %}
+{% load core_tags %}
+
+{% block title %}Analysis Jobs - PYQ Analyzer{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="sm:flex sm:items-center sm:justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Analysis Jobs</h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Monitor and manage paper analysis jobs
+            </p>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+            <div class="flex items-center">
+                <div class="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                    <i data-lucide="loader" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Processing</p>
+                    <p class="text-xl font-semibold text-gray-900 dark:text-white">{{ stats.processing|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+            <div class="flex items-center">
+                <div class="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30">
+                    <i data-lucide="clock" class="w-5 h-5 text-yellow-600 dark:text-yellow-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Pending</p>
+                    <p class="text-xl font-semibold text-gray-900 dark:text-white">{{ stats.pending|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+            <div class="flex items-center">
+                <div class="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                    <i data-lucide="check-circle" class="w-5 h-5 text-green-600 dark:text-green-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Completed</p>
+                    <p class="text-xl font-semibold text-gray-900 dark:text-white">{{ stats.completed|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+            <div class="flex items-center">
+                <div class="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
+                    <i data-lucide="x-circle" class="w-5 h-5 text-red-600 dark:text-red-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Failed</p>
+                    <p class="text-xl font-semibold text-gray-900 dark:text-white">{{ stats.failed|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Jobs -->
+    {% if active_jobs %}
+    <div class="mb-8">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Active Jobs</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {% for job in active_jobs %}
+            {% include 'partials/analysis_progress.html' with job=job %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- All Jobs -->
+    <div class="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">All Jobs</h2>
+        </div>
+        
+        {% if jobs %}
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-900">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Paper</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Subject</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Progress</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Started</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {% for job in jobs %}
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-750">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="{% url 'papers:detail' job.paper.id %}" class="text-sm font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400">
+                            {{ job.paper.title|truncatechars:30 }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ job.paper.subject.code }}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if job.status == 'completed' %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                            <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i>
+                            Completed
+                        </span>
+                        {% elif job.status == 'processing' %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                            <i data-lucide="loader" class="w-3 h-3 mr-1 animate-spin"></i>
+                            Processing
+                        </span>
+                        {% elif job.status == 'failed' %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
+                            <i data-lucide="x-circle" class="w-3 h-3 mr-1"></i>
+                            Failed
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                            <i data-lucide="clock" class="w-3 h-3 mr-1"></i>
+                            Pending
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-2">
+                                <div class="bg-indigo-600 h-2 rounded-full" style="width: {{ job.progress|default:0 }}%"></div>
+                            </div>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ job.progress|default:0 }}%</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {{ job.created_at|timesince }} ago
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div class="flex justify-end space-x-2">
+                            <a href="{% url 'analysis:job_detail' job.id %}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400" title="View">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </a>
+                            {% if job.status == 'failed' %}
+                            <button type="button"
+                                    hx-post="{% url 'analysis:retry' job.id %}"
+                                    class="text-green-600 hover:text-green-900 dark:text-green-400" title="Retry">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        {% include 'components/pagination.html' with page_obj=jobs %}
+        {% else %}
+        <div class="p-12 text-center">
+            <i data-lucide="cpu" class="mx-auto h-12 w-12 text-gray-400"></i>
+            <h3 class="mt-4 text-sm font-medium text-gray-900 dark:text-white">No analysis jobs</h3>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Upload a paper to start analyzing.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

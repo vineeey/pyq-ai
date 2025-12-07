@@ -1,0 +1,202 @@
+{% extends 'base/base.html' %}
+{% load core_tags %}
+
+{% block title %}Generate Report - PYQ Analyzer{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Generate Report</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Create a comprehensive PDF report of your analysis
+        </p>
+    </div>
+
+    <!-- Form -->
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- Subject Selection -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Select Subject</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="id_subject" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Subject <span class="text-red-500">*</span>
+                    </label>
+                    <select name="subject" id="id_subject" required
+                            class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">Select a subject</option>
+                        {% for subject in subjects %}
+                        <option value="{{ subject.id }}" {% if selected_subject == subject.id %}selected{% endif %}>
+                            {{ subject.code }} - {{ subject.name }} ({{ subject.papers_count }} papers, {{ subject.questions_count }} questions)
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Type -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Report Type</h2>
+            
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <label class="relative flex cursor-pointer rounded-lg border bg-white dark:bg-gray-800 p-4 shadow-sm focus:outline-none border-gray-300 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-600">
+                        <input type="radio" name="report_type" value="full_subject" class="sr-only" checked>
+                        <span class="flex flex-1">
+                            <span class="flex flex-col">
+                                <span class="block text-sm font-medium text-gray-900 dark:text-white">Full Subject Report</span>
+                                <span class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">Complete analysis of all papers and questions</span>
+                            </span>
+                        </span>
+                        <i data-lucide="check-circle" class="h-5 w-5 text-indigo-600 hidden"></i>
+                    </label>
+                    
+                    <label class="relative flex cursor-pointer rounded-lg border bg-white dark:bg-gray-800 p-4 shadow-sm focus:outline-none border-gray-300 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-600">
+                        <input type="radio" name="report_type" value="module" class="sr-only">
+                        <span class="flex flex-1">
+                            <span class="flex flex-col">
+                                <span class="block text-sm font-medium text-gray-900 dark:text-white">Module Report</span>
+                                <span class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">Questions organized by module</span>
+                            </span>
+                        </span>
+                        <i data-lucide="check-circle" class="h-5 w-5 text-indigo-600 hidden"></i>
+                    </label>
+                    
+                    <label class="relative flex cursor-pointer rounded-lg border bg-white dark:bg-gray-800 p-4 shadow-sm focus:outline-none border-gray-300 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-600">
+                        <input type="radio" name="report_type" value="topic" class="sr-only">
+                        <span class="flex flex-1">
+                            <span class="flex flex-col">
+                                <span class="block text-sm font-medium text-gray-900 dark:text-white">Topic Report</span>
+                                <span class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">Questions grouped by topic</span>
+                            </span>
+                        </span>
+                        <i data-lucide="check-circle" class="h-5 w-5 text-indigo-600 hidden"></i>
+                    </label>
+                    
+                    <label class="relative flex cursor-pointer rounded-lg border bg-white dark:bg-gray-800 p-4 shadow-sm focus:outline-none border-gray-300 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-600">
+                        <input type="radio" name="report_type" value="trend" class="sr-only">
+                        <span class="flex flex-1">
+                            <span class="flex flex-col">
+                                <span class="block text-sm font-medium text-gray-900 dark:text-white">Trend Report</span>
+                                <span class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">Year-over-year analysis and patterns</span>
+                            </span>
+                        </span>
+                        <i data-lucide="check-circle" class="h-5 w-5 text-indigo-600 hidden"></i>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Options -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Include in Report</h2>
+            
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            <input type="checkbox" name="include_analytics" id="include_analytics" checked
+                                   class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700">
+                        </div>
+                        <div class="ml-3">
+                            <label for="include_analytics" class="font-medium text-gray-700 dark:text-gray-300">Analytics Summary</label>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Charts and statistics</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            <input type="checkbox" name="include_questions" id="include_questions" checked
+                                   class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700">
+                        </div>
+                        <div class="ml-3">
+                            <label for="include_questions" class="font-medium text-gray-700 dark:text-gray-300">Question List</label>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Full question text and metadata</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            <input type="checkbox" name="include_duplicates" id="include_duplicates" checked
+                                   class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700">
+                        </div>
+                        <div class="ml-3">
+                            <label for="include_duplicates" class="font-medium text-gray-700 dark:text-gray-300">Duplicate Analysis</label>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Similar and repeated questions</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            <input type="checkbox" name="include_bloom" id="include_bloom" checked
+                                   class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700">
+                        </div>
+                        <div class="ml-3">
+                            <label for="include_bloom" class="font-medium text-gray-700 dark:text-gray-300">Bloom's Analysis</label>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Cognitive level distribution</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            <input type="checkbox" name="include_difficulty" id="include_difficulty" checked
+                                   class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700">
+                        </div>
+                        <div class="ml-3">
+                            <label for="include_difficulty" class="font-medium text-gray-700 dark:text-gray-300">Difficulty Analysis</label>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Difficulty level distribution</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Title -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Report Details</h2>
+            
+            <div>
+                <label for="id_title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Report Title
+                </label>
+                <input type="text" name="title" id="id_title" 
+                       placeholder="Auto-generated if left empty"
+                       class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="flex justify-end space-x-4">
+            <a href="{% url 'reports:list' %}" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                Cancel
+            </a>
+            <button type="submit" class="inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <i data-lucide="file-bar-chart" class="w-4 h-4 mr-2"></i>
+                Generate Report
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+/* Radio button selection styles */
+input[type="radio"]:checked + span + i {
+    display: block;
+}
+input[type="radio"]:checked ~ * {
+    border-color: rgb(99 102 241);
+}
+label:has(input[type="radio"]:checked) {
+    border-color: rgb(99 102 241);
+    background-color: rgb(238 242 255);
+}
+.dark label:has(input[type="radio"]:checked) {
+    background-color: rgb(49 46 129 / 0.3);
+}
+</style>
+{% endblock %}

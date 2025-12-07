@@ -1,0 +1,122 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ subject.name }} - PYQ Analyzer{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="flex justify-between items-start mb-8">
+        <div>
+            <div class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-2">
+                <a href="{% url 'subjects:list' %}" class="hover:text-indigo-600">Subjects</a>
+                <span>/</span>
+                <span>{{ subject.code|default:subject.name }}</span>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ subject.name }}</h1>
+            {% if subject.university %}
+            <p class="text-gray-600 dark:text-gray-400 mt-1">{{ subject.university }}</p>
+            {% endif %}
+        </div>
+        <div class="flex space-x-3">
+            <a href="{% url 'papers:upload' subject.pk %}" class="btn-primary flex items-center">
+                <i data-lucide="upload" class="w-5 h-5 mr-2"></i>
+                Upload Paper
+            </a>
+            <a href="{% url 'subjects:update' subject.pk %}" class="btn-secondary flex items-center">
+                <i data-lucide="edit" class="w-5 h-5 mr-2"></i>
+                Edit
+            </a>
+        </div>
+    </div>
+    
+    <!-- Stats -->
+    <div class="grid grid-cols-4 gap-4 mb-8">
+        <div class="card p-4">
+            <p class="text-sm text-gray-500 dark:text-gray-400">Modules</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ subject.modules.count }}</p>
+        </div>
+        <div class="card p-4">
+            <p class="text-sm text-gray-500 dark:text-gray-400">Papers</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ subject.papers.count }}</p>
+        </div>
+        <div class="card p-4">
+            <p class="text-sm text-gray-500 dark:text-gray-400">Questions</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
+        </div>
+        <div class="card p-4">
+            <p class="text-sm text-gray-500 dark:text-gray-400">Rules</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ subject.rules.count }}</p>
+        </div>
+    </div>
+    
+    <!-- Modules Section -->
+    <div class="card mb-8">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Modules</h2>
+            <a href="{% url 'subjects:module_create' subject.pk %}" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm flex items-center">
+                <i data-lucide="plus" class="w-4 h-4 mr-1"></i>
+                Add Module
+            </a>
+        </div>
+        
+        {% if subject.modules.count %}
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+            {% for module in subject.modules.all %}
+            <div class="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                <div>
+                    <span class="text-sm font-medium text-indigo-600 dark:text-indigo-400">Module {{ module.number }}</span>
+                    <h3 class="font-medium text-gray-900 dark:text-white">{{ module.name }}</h3>
+                    {% if module.topics %}
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ module.topics|join:", "|truncatechars:80 }}
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="text-sm text-gray-500">{{ module.weightage }}%</span>
+                    <a href="{% url 'subjects:module_update' module.pk %}" class="text-gray-400 hover:text-indigo-600">
+                        <i data-lucide="edit" class="w-4 h-4"></i>
+                    </a>
+                    <a href="{% url 'subjects:module_delete' module.pk %}" class="text-gray-400 hover:text-red-600">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="p-8 text-center">
+            <p class="text-gray-500 dark:text-gray-400">No modules defined yet</p>
+            <a href="{% url 'subjects:module_create' subject.pk %}" class="text-indigo-600 dark:text-indigo-400 hover:underline mt-2 inline-block">
+                Add your first module
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Quick Links -->
+    <div class="grid md:grid-cols-3 gap-4">
+        <a href="{% url 'papers:list' subject.pk %}" class="card p-4 hover:shadow-md transition flex items-center">
+            <i data-lucide="file-text" class="w-8 h-8 text-indigo-600 dark:text-indigo-400 mr-4"></i>
+            <div>
+                <p class="font-medium text-gray-900 dark:text-white">Question Papers</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">View and upload papers</p>
+            </div>
+        </a>
+        <a href="{% url 'rules:list' subject.pk %}" class="card p-4 hover:shadow-md transition flex items-center">
+            <i data-lucide="code" class="w-8 h-8 text-green-600 dark:text-green-400 mr-4"></i>
+            <div>
+                <p class="font-medium text-gray-900 dark:text-white">Classification Rules</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Define custom rules</p>
+            </div>
+        </a>
+        <a href="{% url 'analytics:dashboard' subject.pk %}" class="card p-4 hover:shadow-md transition flex items-center">
+            <i data-lucide="bar-chart-3" class="w-8 h-8 text-purple-600 dark:text-purple-400 mr-4"></i>
+            <div>
+                <p class="font-medium text-gray-900 dark:text-white">Analytics</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">View statistics and trends</p>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}
