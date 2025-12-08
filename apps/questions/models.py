@@ -71,6 +71,18 @@ class Question(BaseModel):
     )
     similarity_score = models.FloatField(null=True, blank=True)
     
+    # Topic cluster (for repetition analysis)
+    topic_cluster = models.ForeignKey(
+        'analytics.TopicCluster',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='questions'
+    )
+    
+    # Part (A or B) - extracted from question paper
+    part = models.CharField(max_length=1, blank=True, help_text='Part A or Part B')
+    
     # Manual override flags
     module_manually_set = models.BooleanField(default=False)
     difficulty_manually_set = models.BooleanField(default=False)
