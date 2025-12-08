@@ -107,3 +107,89 @@ class Module(SoftDeleteModel):
         if topic in self.topics:
             self.topics.remove(topic)
             self.save(update_fields=['topics'])
+
+
+class ExamPattern(SoftDeleteModel):
+    """
+    Configurable exam pattern for mapping questions to modules.
+    Example: KTU pattern - Part A Q1-2 -> Module 1, Q3-4 -> Module 2, etc.
+    """
+    
+    subject = models.OneToOneField(
+        Subject,
+        on_delete=models.CASCADE,
+        related_name='exam_pattern',
+        null=True,
+        blank=True
+    )
+    
+    name = models.CharField(max_length=255, default='Default Pattern')
+    description = models.TextField(blank=True)
+    
+    # Pattern configuration stored as JSON
+    # Example for KTU:
+    # {
+    #   "part_a": {"1": 1, "2": 1, "3": 2, "4": 2, "5": 3, "6": 3, "7": 4, "8": 4, "9": 5, "10": 5},
+    #   "part_b": {"11": 1, "12": 1, "13": 2, "14": 2, "15": 3, "16": 3, "17": 4, "18": 4, "19": 5, "20": 5}
+    # }
+    pattern_config = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='Question number to module mapping'
+    )
+    
+    # Default marks per question type
+    part_a_marks = models.PositiveIntegerField(default=3)
+    part_b_marks = models.PositiveIntegerField(default=14)
+    
+    class Meta:
+        verbose_name = 'Exam Pattern'
+        verbose_name_plural = 'Exam Patterns'
+    
+    def __str__(self):
+        return f"{self.name} ({self.subject.name if self.subject else 'Global'})"
+    
+    def get_module_for_question(self, question_number: str, part: str) -> int:
+        """
+        Get module number for a question based on pattern.
+        
+        Args:
+            question_number: Question number as string (e.g., "1", "11a")
+            part: Part A or B
+            
+        Returns:
+            Module number or None
+        """
+        # Extract numeric part from question number
+        import re
+        match = re.match(r'(\d+)', str(question_number))
+        if not match:
+            return None
+        
+        q_num = match.group(1)
+        part_key = f'part_{part.lower()}'
+        
+        if part_key in self.pattern_config:
+            return self.pattern_config[part_key].get(q_num)
+        
+        return None
+    
+    @classmethod
+    def get_default_ktu_pattern(cls):
+        """Return default KTU exam pattern configuration."""
+        return {
+            'part_a': {
+                '1': 1, '2': 1,
+                '3': 2, '4': 2,
+                '5': 3, '6': 3,
+                '7': 4, '8': 4,
+                '9': 5, '10': 5,
+            },
+            'part_b': {
+                '11': 1, '12': 1,
+                '13': 2, '14': 2,
+                '15': 3, '16': 3,
+                '17': 4, '18': 4,
+                '19': 5, '20': 5,
+            }
+        }
