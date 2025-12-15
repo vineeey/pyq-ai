@@ -1,172 +1,212 @@
-/**
- * PYQ Analyzer - Main JavaScript
- * Enhanced with scroll animations and 3D effects
- */
+// Main application JavaScript
 
-// Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize scroll reveal animations
-    initScrollReveal();
+    // Initialize animations
+    initAnimations();
     
-    // Initialize 3D tilt effects
-    init3DTilt();
+    // Initialize tooltips
+    initTooltips();
     
-    // Initialize smooth scrolling
-    initSmoothScroll();
+    // Initialize cluster interactions
+    initClusterInteractions();
     
-    // Re-initialize after HTMX swaps
-    document.body.addEventListener('htmx:afterSwap', function() {
-        // Re-initialize all effects for new content
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
-        }
-        initScrollReveal();
-        init3DTilt();
-    });
-});
-
-// HTMX configuration
-document.body.addEventListener('htmx:configRequest', function(evt) {
-    // Add CSRF token to all HTMX requests
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
-    if (csrfToken) {
-        evt.detail.headers['X-CSRFToken'] = csrfToken.value;
+    // Initialize module filter
+    initModuleFilter();
+    
+    // Re-initialize after HTMX swaps (if HTMX is available)
+    if (typeof htmx !== 'undefined') {
+        document.body.addEventListener('htmx:afterSwap', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            initAnimations();
+        });
     }
 });
 
-// Configuration constants
-const SCROLL_REVEAL_CONFIG = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
-
-const TILT_3D_CONFIG = {
-    perspective: 1000,
-    maxRotation: 10,
-    scale: 1.05
-};
-
-// Scroll Reveal Animation
-function initScrollReveal() {
-    const revealElements = document.querySelectorAll('.scroll-reveal');
+// Animate elements on page load
+function initAnimations() {
+    const animatedElements = document.querySelectorAll('.animate-on-scroll');
     
-    const revealObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('revealed');
+                setTimeout(() => {
+                    entry.target.classList.add('animate-slide-up');
+                }, index * 100);
+                observer.unobserve(entry.target);
             }
         });
-    }, SCROLL_REVEAL_CONFIG);
+    }, {
+        threshold: 0.1
+    });
     
-    revealElements.forEach(el => revealObserver.observe(el));
+    animatedElements.forEach(el => observer.observe(el));
 }
 
-// 3D Tilt Effect for Cards
-function init3DTilt() {
-    const cards = document.querySelectorAll('.card-3d-tilt');
+// Initialize tooltips
+function initTooltips() {
+    const tooltipTriggers = document.querySelectorAll('[data-tooltip]');
     
-    cards.forEach(card => {
-        card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            
-            const rotateX = (y - centerY) / TILT_3D_CONFIG.maxRotation;
-            const rotateY = (centerX - x) / TILT_3D_CONFIG.maxRotation;
-            
-            card.style.transform = `perspective(${TILT_3D_CONFIG.perspective}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(${TILT_3D_CONFIG.scale}, ${TILT_3D_CONFIG.scale}, ${TILT_3D_CONFIG.scale})`;
+    tooltipTriggers.forEach(trigger => {
+        trigger.addEventListener('mouseenter', function() {
+            showTooltip(this);
         });
         
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = `perspective(${TILT_3D_CONFIG.perspective}px) rotateX(0) rotateY(0) scale3d(1, 1, 1)`;
+        trigger.addEventListener('mouseleave', function() {
+            hideTooltip(this);
         });
     });
 }
 
-// Smooth Scrolling
-function initSmoothScroll() {
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            const href = this.getAttribute('href');
-            if (href !== '#') {
-                e.preventDefault();
-                const target = document.querySelector(href);
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
+function showTooltip(element) {
+    const tooltipText = element.getAttribute('data-tooltip');
+    const tooltip = document.createElement('div');
+    tooltip.className = 'tooltip absolute bg-gray-800 text-white text-sm px-3 py-2 rounded shadow-lg z-50';
+    tooltip.textContent = tooltipText;
+    tooltip.id = 'active-tooltip';
+    
+    document.body.appendChild(tooltip);
+    
+    const rect = element.getBoundingClientRect();
+    tooltip.style.top = (rect.top - tooltip.offsetHeight - 5) + 'px';
+    tooltip.style.left = (rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2)) + 'px';
+}
+
+function hideTooltip(element) {
+    const tooltip = document.getElementById('active-tooltip');
+    if (tooltip) {
+        tooltip.remove();
+    }
+}
+
+// Cluster interactions
+function initClusterInteractions() {
+    const clusterItems = document.querySelectorAll('.cluster-item');
+    
+    clusterItems.forEach(item => {
+        item.addEventListener('click', function() {
+            this.classList.toggle('expanded');
+            const details = this.querySelector('.cluster-details');
+            if (details) {
+                details.classList.toggle('hidden');
+            }
+        });
+    });
+}
+
+// Module filter
+function initModuleFilter() {
+    const filterButtons = document.querySelectorAll('[data-module-filter]');
+    const clusterItems = document.querySelectorAll('[data-module]');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const filterValue = this.getAttribute('data-module-filter');
+            
+            // Update active button
+            filterButtons.forEach(btn => btn.classList.remove('active', 'bg-blue-600', 'text-white'));
+            this.classList.add('active', 'bg-blue-600', 'text-white');
+            
+            // Filter clusters
+            clusterItems.forEach(item => {
+                const itemModule = item.getAttribute('data-module');
+                if (filterValue === 'all' || itemModule === filterValue) {
+                    item.style.display = 'block';
+                    item.classList.add('animate-fade-in');
+                } else {
+                    item.style.display = 'none';
                 }
+            });
+        });
+    });
+}
+
+// Priority tier helpers
+function getPriorityBadge(tier, count) {
+    const badges = {
+        'tier_1': { emoji: '🔥🔥🔥', text: 'TOP PRIORITY', class: 'badge-tier-1' },
+        'tier_2': { emoji: '🔥🔥', text: 'HIGH PRIORITY', class: 'badge-tier-2' },
+        'tier_3': { emoji: '🔥', text: 'MEDIUM PRIORITY', class: 'badge-tier-3' },
+        'tier_4': { emoji: '✓', text: 'LOW PRIORITY', class: 'badge-tier-4' }
+    };
+    
+    const badge = badges[tier] || badges['tier_4'];
+    return `<span class="${badge.class}">${badge.emoji} ${badge.text} (${count}x)</span>`;
+}
+
+// Export to PDF
+function exportToPDF(subjectId) {
+    window.location.href = `/reports/${subjectId}/pdf/`;
+}
+
+// Copy cluster text
+function copyClusterText(element) {
+    const text = element.closest('.cluster-item').querySelector('.cluster-topic').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        showNotification('Copied to clipboard!', 'success');
+    });
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white z-50 animate-slide-up ${
+        type === 'success' ? 'bg-green-500' : 
+        type === 'error' ? 'bg-red-500' : 
+        'bg-blue-500'
+    }`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('animate-fade-out');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Search functionality
+function initSearch() {
+    const searchInput = document.getElementById('cluster-search');
+    if (!searchInput) return;
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const clusters = document.querySelectorAll('.cluster-item');
+        
+        clusters.forEach(cluster => {
+            const text = cluster.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                cluster.style.display = 'block';
+                cluster.classList.add('animate-fade-in');
+            } else {
+                cluster.style.display = 'none';
             }
         });
     });
 }
 
-// File upload preview
-function previewFile(input, previewId) {
-    const preview = document.getElementById(previewId);
-    if (input.files && input.files[0]) {
-        const file = input.files[0];
-        preview.textContent = `Selected: ${file.name} (${formatFileSize(file.size)})`;
+// Initialize search if search box exists
+if (document.getElementById('cluster-search')) {
+    initSearch();
+}
+
+// Smooth scroll to section
+function scrollToSection(sectionId) {
+    const element = document.getElementById(sectionId);
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
 
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+// Toggle dark mode (future enhancement)
+function toggleDarkMode() {
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
 }
 
-// Loading Animation
-function showLoading(message = 'Loading...') {
-    const loading = document.createElement('div');
-    loading.id = 'loading-overlay';
-    loading.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-    loading.innerHTML = `
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-8 flex flex-col items-center space-y-4 animate-scale-in">
-            <div class="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-gray-700 dark:text-gray-300 font-medium">${message}</p>
-        </div>
-    `;
-    document.body.appendChild(loading);
-}
-
-function hideLoading() {
-    const loading = document.getElementById('loading-overlay');
-    if (loading) {
-        loading.classList.add('animate-fade-out');
-        setTimeout(() => loading.remove(), 300);
-    }
-}
-
-// Chart.js default configuration
-if (typeof Chart !== 'undefined') {
-    Chart.defaults.font.family = 'system-ui, -apple-system, sans-serif';
-    Chart.defaults.plugins.legend.position = 'bottom';
-    Chart.defaults.animation.duration = 1000;
-    Chart.defaults.animation.easing = 'easeInOutQuart';
-}
-
-// Parallax Effect for Background
-function initParallax() {
-    const parallaxElements = document.querySelectorAll('.parallax');
-    
-    window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
-        
-        parallaxElements.forEach(el => {
-            const speed = el.dataset.speed || 0.5;
-            el.style.transform = `translateY(${scrolled * speed}px)`;
-        });
-    });
-}
-
-// Initialize parallax if elements exist
-if (document.querySelector('.parallax')) {
-    initParallax();
+// Load dark mode preference
+if (localStorage.getItem('darkMode') === 'true') {
+    document.documentElement.classList.add('dark');
 }

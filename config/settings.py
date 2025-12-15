@@ -1,9 +1,17 @@
 """
 Django settings for PYQ Analyzer project.
-Zero-cost edition with SQLite3 and local LLM (Ollama + Llama 3.2).
+Zero-cost edition with SQLite3 and Qwen 2.5 7B Instruct API.
 """
 import os
 from pathlib import Path
+
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).resolve().parent.parent / '.env')
+except ImportError:
+    # python-dotenv not installed, will use system env vars
+    pass
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -141,10 +149,15 @@ Q_CLUSTER = {
     'orm': 'default',
 }
 
-# Ollama Configuration (Local LLM)
+# Qwen API Configuration
+QWEN_API_KEY = os.environ.get('QWEN_API_KEY', '')
+QWEN_API_URL = os.environ.get('QWEN_API_URL', 'https://dashscope.aliyuncs.com/compatible-mode/v1')
+QWEN_MODEL = os.environ.get('QWEN_MODEL', 'qwen2.5-7b-instruct')
+
+# Legacy Ollama Configuration (deprecated - use Qwen API)
 OLLAMA_BASE_URL = os.environ.get('OLLAMA_BASE_URL', 'http://localhost:11434')
-OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'llama3.2:3b')
-# Supported models: tinyllama, llama3.2:3b, llama3.1:3b, phi3
+OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'qwen2.5:7b-instruct')
+# Supported models: qwen2.5:7b-instruct, llama3.2:3b, llama3.1:3b, phi3, tinyllama
 OLLAMA_TIMEOUT = int(os.environ.get('OLLAMA_TIMEOUT', '120'))
 
 # Embedding Model Configuration

@@ -5,6 +5,7 @@ from . import views
 app_name = 'analysis'
 
 urlpatterns = [
+    path('jobs/', views.AnalysisJobListView.as_view(), name='job_list'),
     path('job/<uuid:pk>/', views.AnalysisDetailView.as_view(), name='detail'),
     path('job/<uuid:pk>/status/', views.AnalysisStatusView.as_view(), name='status'),
     path('subject/<uuid:subject_pk>/analyze/', views.ManualAnalyzeView.as_view(), name='manual_analyze'),

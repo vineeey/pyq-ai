@@ -1,5 +1,5 @@
 """Views for analytics dashboard."""
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView, View, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponse, FileResponse
@@ -11,6 +11,39 @@ from apps.analytics.models import TopicCluster
 from .calculator import StatsCalculator
 
 
+class SubjectListView(LoginRequiredMixin, ListView):
+    """List all subjects with cluster statistics."""
+    
+    template_name = 'analytics/subject_list.html'
+    context_object_name = 'subjects'
+    
+    def get_queryset(self):
+        subjects = Subject.objects.filter(user=self.request.user).prefetch_related('papers')
+        
+        # Annotate each subject with cluster counts
+        subject_list = []
+        for subject in subjects:
+            subject.tier_1_count = TopicCluster.objects.filter(
+                subject=subject,
+                priority_tier=TopicCluster.PriorityTier.TIER_1
+            ).count()
+            subject.tier_2_count = TopicCluster.objects.filter(
+                subject=subject,
+                priority_tier=TopicCluster.PriorityTier.TIER_2
+            ).count()
+            subject.tier_3_count = TopicCluster.objects.filter(
+                subject=subject,
+                priority_tier=TopicCluster.PriorityTier.TIER_3
+            ).count()
+            subject.tier_4_count = TopicCluster.objects.filter(
+                subject=subject,
+                priority_tier=TopicCluster.PriorityTier.TIER_4
+            ).count()
+            subject_list.append(subject)
+        
+        return subject_list
+
+
 class AnalyticsDashboardView(LoginRequiredMixin, TemplateView):
     """Analytics dashboard for a subject showing all modules."""
     
@@ -18,6 +51,7 @@ class AnalyticsDashboardView(LoginRequiredMixin, TemplateView):
     
     def get_context_data(self, **kwargs):
         import json
+        from collections import defaultdict
         context = super().get_context_data(**kwargs)
         subject = get_object_or_404(
             Subject, pk=self.kwargs['subject_pk'], user=self.request.user
@@ -105,23 +139,45 @@ class AnalyticsDashboardView(LoginRequiredMixin, TemplateView):
         classification_rate = round(questions_with_module / total_questions * 100, 1) if total_questions else 0
         
         context['subject'] = subject
+        
+        # Get all modules
+        modules = subject.modules.all().order_by('number')
+        context['modules'] = modules
+        
+        # Group clusters by module
+        all_clusters = TopicCluster.objects.filter(
+            subject=subject
+        ).select_related('module').prefetch_related('questions').order_by('-frequency_count')
+        
+        clusters_by_module = defaultdict(list)
+        for cluster in all_clusters:
+            if cluster.module:
+                clusters_by_module[cluster.module.id].append(cluster)
+        
+        context['clusters_by_module'] = dict(clusters_by_module)
+        
+        # Priority tier counts
         context['stats'] = {
-            **stats['overview'],
+            'tier_1_count': TopicCluster.objects.filter(
+                subject=subject, 
+                priority_tier=TopicCluster.PriorityTier.TIER_1
+            ).count(),
+            'tier_2_count': TopicCluster.objects.filter(
+                subject=subject, 
+                priority_tier=TopicCluster.PriorityTier.TIER_2
+            ).count(),
+            'tier_3_count': TopicCluster.objects.filter(
+                subject=subject, 
+                priority_tier=TopicCluster.PriorityTier.TIER_3
+            ).count(),
+            'tier_4_count': TopicCluster.objects.filter(
+                subject=subject, 
+                priority_tier=TopicCluster.PriorityTier.TIER_4
+            ).count(),
             'total_papers': total_papers,
             'total_questions': total_questions,
             'repeated_questions': repeated_questions,
-            'classification_rate': classification_rate,
         }
-        context['modules'] = module_data
-        context['module_stats'] = module_data  # For template compatibility
-        context['has_analysis'] = TopicCluster.objects.filter(subject=subject).exists()
-        
-        # Get repeated questions (tier 1 and tier 2 topics)
-        repeated_clusters = TopicCluster.objects.filter(
-            subject=subject,
-            frequency_count__gte=2
-        ).order_by('-frequency_count')[:10]
-        context['repeated_questions'] = repeated_clusters
         
         return context
 

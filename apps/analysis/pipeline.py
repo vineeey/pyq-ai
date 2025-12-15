@@ -12,11 +12,20 @@ from .models import AnalysisJob
 from .services.pymupdf_extractor import PyMuPDFExtractor
 from .services.extractor import QuestionExtractor
 from .services.classifier import ModuleClassifier
-from .services.ai_classifier import AIClassifier
-from .services.embedder import EmbeddingService
-from .services.similarity import SimilarityService
 from .services.bloom import BloomClassifier
 from .services.difficulty import DifficultyEstimator
+
+# Services with optional numpy dependency
+try:
+    from .services.ai_classifier import AIClassifier
+    from .services.embedder import EmbeddingService
+    from .services.similarity import SimilarityService
+    NUMPY_AVAILABLE = True
+except ImportError:
+    NUMPY_AVAILABLE = False
+    AIClassifier = None
+    EmbeddingService = None
+    SimilarityService = None
 
 logger = logging.getLogger(__name__)
 
@@ -33,15 +42,22 @@ class AnalysisPipeline:
         self.pymupdf_extractor = PyMuPDFExtractor()  # Primary extractor
         self.fallback_extractor = QuestionExtractor()  # Fallback
         
-        # Services
-        self.embedder = EmbeddingService()
-        self.similarity = SimilarityService()
+        # Services (with numpy fallback handling)
+        if NUMPY_AVAILABLE:
+            self.embedder = EmbeddingService()
+            self.similarity = SimilarityService()
+            self.ai_classifier = AIClassifier(llm_client, self.embedder)
+        else:
+            self.embedder = None
+            self.similarity = None
+            self.ai_classifier = None
+            logger.warning("NumPy not available - AI features disabled")
+        
         self.bloom_classifier = BloomClassifier(llm_client)
         self.difficulty_estimator = DifficultyEstimator(llm_client)
         
         # Classifiers
         self.module_classifier = ModuleClassifier(llm_client)  # For KTU
-        self.ai_classifier = AIClassifier(llm_client, self.embedder)  # For Others
         
         self.llm_client = llm_client
     
@@ -68,7 +84,8 @@ class AnalysisPipeline:
             
             # Step 1: Extract text, images, and questions using PyMuPDF
             job.status = AnalysisJob.Status.EXTRACTING
-            job.progress = 10
+            job.progress = 5
+            job.status_detail = 'Reading PDF file...'
             job.save()
             
             try:
@@ -97,10 +114,13 @@ class AnalysisPipeline:
             
             job.questions_extracted = len(questions_data)
             job.progress = 30
+            job.status_detail = f'Found {len(questions_data)} questions from {paper.page_count} pages'
             job.save()
             
             # Step 2: Classify questions based on university type
             job.status = AnalysisJob.Status.CLASSIFYING
+            job.progress = 40
+            job.status_detail = 'Creating question records...'
             job.save()
             
             modules = list(subject.modules.all())
@@ -112,12 +132,20 @@ class AnalysisPipeline:
                 )
             else:
                 # Other Universities: Use AI-based classification
-                syllabus_text = subject.syllabus_text if hasattr(subject, 'syllabus_text') else None
-                classified_questions = self.ai_classifier.classify_questions_semantic(
-                    questions_data, subject, syllabus_text
-                )
+                if self.ai_classifier:
+                    syllabus_text = subject.syllabus_text if hasattr(subject, 'syllabus_text') else None
+                    classified_questions = self.ai_classifier.classify_questions_semantic(
+                        questions_data, subject, syllabus_text
+                    )
+                else:
+                    # Fallback to KTU classification if AI not available
+                    logger.warning("AI classifier not available, using KTU classification")
+                    classified_questions = self._classify_ktu_questions(
+                        questions_data, subject, modules
+                    )
             
             job.progress = 60
+            job.status_detail = f'Classified {len(classified_questions)} questions'
             job.save()
             
             # Step 3: Create question objects in database
@@ -125,7 +153,14 @@ class AnalysisPipeline:
             job.save()
             
             created_questions = []
-            for q_data in classified_questions:
+            for i, q_data in enumerate(classified_questions):
+                # Update progress every 5 questions
+                if i > 0 and i % 5 == 0:
+                    progress = 60 + int((i / len(classified_questions)) * 20)
+                    job.progress = progress
+                    job.status_detail = f'Saving question {i}/{len(classified_questions)}...'
+                    job.save()
+                
                 # Find module
                 module = None
                 if 'module_number' in q_data:
@@ -152,6 +187,7 @@ class AnalysisPipeline:
                 created_questions.append(question)
             
             job.progress = 90
+            job.status_detail = 'Finalizing analysis...'
             job.save()
             
             # Step 4: Mark paper as completed
@@ -162,6 +198,7 @@ class AnalysisPipeline:
             # Complete job
             job.status = AnalysisJob.Status.COMPLETED
             job.progress = 100
+            job.status_detail = 'Analysis completed successfully'
             job.completed_at = timezone.now()
             job.save()
             
@@ -202,36 +239,6 @@ class AnalysisPipeline:
         classified = []
         
         for q_data in questions_data:
-                            module = next((m for m in modules if m.number == module_num), None)
-                            if module:
-                                question.module = module
-                
-                # Bloom's taxonomy (rule-based, fast)
-                question.bloom_level = self.bloom_classifier.classify(q_data['text'])
-                
-                # Difficulty (rule-based, fast)
-                question.difficulty = self.difficulty_estimator.estimate(
-                    q_data['text'], q_data.get('marks')
-                )
-                
-                question.save()
-                created_questions.append((question, q_data))
-            
-            job.progress = 40
-            job.save()
-            
-            # Batch classify questions without module hints
-            unclassified = [(q, data) for q, data in created_questions if q.module is None]
-            if unclassified and modules and self.module_classifier:
-                question_texts = [data['text'] for _, data in unclassified]
-                module_nums = self.module_classifier.classify_batch(question_texts, subject, modules)
-                
-                for (question, _), module_num in zip(unclassified, module_nums):
-                    if module_num:
-                        question.module = next(
-                            (m for m in modules if m.number == module_num), None
-                        )
-                        question.save()
             # Get module assignment from pattern
             module_num = None
             part = q_data.get('part', '')
@@ -273,51 +280,3 @@ class AnalysisPipeline:
             return 'comparison'
         else:
             return 'theory'
-
-            
-            # Step 4: Detect duplicates
-            job.status = AnalysisJob.Status.DETECTING
-            job.progress = 85
-            job.save()
-            
-            # Get all questions for this subject for duplicate detection
-            all_subject_questions = Question.objects.filter(
-                paper__subject=subject
-            ).exclude(embedding__isnull=True)
-            
-            existing = [(str(q.id), q.embedding) for q in all_subject_questions]
-            
-            duplicates = self.similarity.batch_find_duplicates(existing)
-            
-            for q_id, dup_id, score in duplicates:
-                try:
-                    question = Question.objects.get(id=q_id)
-                    question.is_duplicate = True
-                    question.duplicate_of_id = dup_id
-                    question.similarity_score = score
-                    question.save()
-                except Question.DoesNotExist:
-                    pass
-            
-            job.duplicates_found = len(duplicates)
-            
-            # Complete
-            job.status = AnalysisJob.Status.COMPLETED
-            job.progress = 100
-            job.completed_at = timezone.now()
-            
-            paper.status = Paper.ProcessingStatus.COMPLETED
-            paper.processed_at = timezone.now()
-            paper.save()
-            
-        except Exception as e:
-            logger.error(f"Analysis failed for paper {paper.id}: {e}")
-            job.status = AnalysisJob.Status.FAILED
-            job.error_message = str(e)
-            
-            paper.status = Paper.ProcessingStatus.FAILED
-            paper.processing_error = str(e)
-            paper.save()
-        
-        job.save()
-        return job

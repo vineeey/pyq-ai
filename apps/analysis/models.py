@@ -26,6 +26,7 @@ class AnalysisJob(BaseModel):
         default=Status.QUEUED
     )
     progress = models.PositiveIntegerField(default=0)  # 0-100
+    status_detail = models.CharField(max_length=255, blank=True, default='')  # Detailed status message
     error_message = models.TextField(blank=True)
     
     # Statistics

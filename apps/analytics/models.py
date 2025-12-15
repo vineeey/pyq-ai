@@ -47,6 +47,7 @@ class TopicCluster(BaseModel):
     frequency_count = models.PositiveIntegerField(default=0, help_text='Number of exams where this topic appears')
     years_appeared = models.JSONField(default=list, blank=True, help_text='List of years/exam names')
     total_marks = models.PositiveIntegerField(default=0, help_text='Total marks across all occurrences')
+    question_count = models.PositiveIntegerField(default=0, help_text='Total number of questions in this cluster')
     
     # Priority tier (calculated from frequency_count)
     priority_tier = models.CharField(
