@@ -1,250 +1,47 @@
-{% extends 'base/base.html' %}
+﻿{% extends 'base/base.html' %}
 {% load static %}
 
 {% block title %}PYQ Analyzer - AI-Powered Question Analysis{% endblock %}
 
-{% block extra_css %}
-<style>
-    .hero-gradient {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-    
-    .feature-card {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .feature-card:hover {
-        transform: translateY(-8px) scale(1.02);
-    }
-    
-    @keyframes float {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-20px); }
-    }
-    
-    .float-animation {
-        animation: float 3s ease-in-out infinite;
-    }
-    
-    @keyframes gradient-shift {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-    }
-    
-    .animated-gradient {
-        background: linear-gradient(270deg, #667eea, #764ba2, #f093fb);
-        background-size: 600% 600%;
-        animation: gradient-shift 10s ease infinite;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 <!-- Hero Section -->
-<div class="hero-gradient min-h-screen flex items-center relative overflow-hidden">
-    <!-- Animated background elements -->
-    <div class="absolute inset-0 opacity-10">
-        <div class="absolute top-20 left-20 w-72 h-72 bg-white rounded-full blur-3xl float-animation"></div>
-        <div class="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full blur-3xl float-animation" style="animation-delay: 1s;"></div>
-    </div>
-    
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="text-center">
-            <div class="mb-8 animate-slide-up">
-                <span class="text-7xl mb-4 inline-block float-animation">📚</span>
+<div class="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 min-h-screen flex items-center">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div class="text-center text-white">
+            <div class="mb-8">
+                <span class="text-8xl"></span>
             </div>
             
-            <h1 class="text-6xl md:text-7xl font-bold text-white mb-6 animate-slide-up">
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-6">
                 PYQ Analyzer
             </h1>
             
-            <p class="text-2xl md:text-3xl text-blue-100 mb-4 animate-slide-up" style="animation-delay: 0.1s;">
+            <p class="text-xl md:text-2xl mb-4 text-blue-100">
                 AI-Powered Repeated Question Analysis
             </p>
             
-            <p class="text-xl text-blue-200 mb-12 max-w-3xl mx-auto animate-slide-up" style="animation-delay: 0.2s;">
-                Discover patterns in past year questions using advanced semantic clustering. 
-                Focus on what matters most for your exams.
+            <p class="text-lg mb-12 text-blue-50 max-w-2xl mx-auto">
+                Smart exam preparation with semantic clustering and priority ranking
             </p>
             
-            <div class="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up" style="animation-delay: 0.3s;">
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 {% if user.is_authenticated %}
                 <a href="{% url 'analytics:subject_list' %}" 
-                   class="bg-white text-purple-600 px-8 py-4 rounded-xl text-lg font-bold shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300">
-                    <svg class="w-6 h-6 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                    Go to Dashboard
+                   class="inline-block bg-white text-purple-700 px-10 py-4 rounded-lg text-lg font-bold hover:bg-gray-100 transition-all shadow-2xl">
+                    Go to Dashboard 
                 </a>
                 {% else %}
-                <a href="{% url 'users:login' %}" 
-                   class="bg-white text-purple-600 px-8 py-4 rounded-xl text-lg font-bold shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300">
-                    Get Started Free
+                <a href="{% url 'papers:upload_generic' %}" 
+                   class="inline-block bg-white text-purple-700 px-10 py-4 rounded-lg text-lg font-bold hover:bg-gray-100 transition-all shadow-2xl">
+                    Upload Papers
                 </a>
-                <a href="#features" 
-                   class="bg-purple-500 bg-opacity-20 backdrop-blur-sm text-white px-8 py-4 rounded-xl text-lg font-bold border-2 border-white hover:bg-opacity-30 transition-all duration-300">
-                    Learn More
+                <a href="{% url 'analytics:subject_list' %}" 
+                   class="inline-block bg-transparent border-2 border-white text-white px-10 py-4 rounded-lg text-lg font-bold hover:bg-white hover:text-purple-700 transition-all">
+                    View Demo
                 </a>
                 {% endif %}
             </div>
         </div>
-    </div>
-</div>
-
-<!-- Features Section -->
-<div id="features" class="py-24 bg-gradient-to-br from-gray-50 to-blue-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16 animate-on-scroll">
-            <h2 class="text-5xl font-bold text-gray-900 mb-4">
-                Why PYQ Analyzer?
-            </h2>
-            <p class="text-xl text-gray-600">
-                Smart features powered by AI to maximize your exam preparation
-            </p>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Feature 1 -->
-            <div class="feature-card bg-white rounded-2xl p-8 shadow-xl animate-on-scroll">
-                <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center mb-6">
-                    <span class="text-3xl">🔥</span>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-4">Priority Ranking</h3>
-                <p class="text-gray-600 mb-4">
-                    Automatically identifies top priority questions repeated 4+ times with semantic AI analysis.
-                </p>
-                <div class="flex flex-wrap gap-2">
-                    <span class="badge-tier-1 text-xs">🔥🔥🔥 TOP</span>
-                    <span class="badge-tier-2 text-xs">🔥🔥 HIGH</span>
-                    <span class="badge-tier-3 text-xs">🔥 MEDIUM</span>
-                </div>
-            </div>
-            
-            <!-- Feature 2 -->
-            <div class="feature-card bg-white rounded-2xl p-8 shadow-xl animate-on-scroll" style="animation-delay: 0.1s;">
-                <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mb-6">
-                    <span class="text-3xl">🤖</span>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-4">AI-Powered Clustering</h3>
-                <p class="text-gray-600 mb-4">
-                    Uses sentence transformers to group questions by semantic meaning, not just keywords.
-                </p>
-                <ul class="text-sm text-gray-600 space-y-2">
-                    <li>✓ Deep semantic understanding</li>
-                    <li>✓ Contextual similarity detection</li>
-                    <li>✓ Intelligent grouping</li>
-                </ul>
-            </div>
-            
-            <!-- Feature 3 -->
-            <div class="feature-card bg-white rounded-2xl p-8 shadow-xl animate-on-scroll" style="animation-delay: 0.2s;">
-                <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl flex items-center justify-center mb-6">
-                    <span class="text-3xl">📊</span>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-4">Smart Reports</h3>
-                <p class="text-gray-600 mb-4">
-                    Generate professional PDF reports with module-wise analysis and year trends.
-                </p>
-                <ul class="text-sm text-gray-600 space-y-2">
-                    <li>✓ Module-wise breakdown</li>
-                    <li>✓ Year-wise patterns</li>
-                    <li>✓ Export to PDF</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Stats Section -->
-<div class="py-20 animated-gradient">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
-            <div class="animate-on-scroll">
-                <div class="text-5xl font-bold mb-2">AI</div>
-                <div class="text-blue-100">Semantic Analysis</div>
-            </div>
-            <div class="animate-on-scroll" style="animation-delay: 0.1s;">
-                <div class="text-5xl font-bold mb-2">4</div>
-                <div class="text-blue-100">Priority Tiers</div>
-            </div>
-            <div class="animate-on-scroll" style="animation-delay: 0.2s;">
-                <div class="text-5xl font-bold mb-2">OCR</div>
-                <div class="text-blue-100">Text Extraction</div>
-            </div>
-            <div class="animate-on-scroll" style="animation-delay: 0.3s;">
-                <div class="text-5xl font-bold mb-2">PDF</div>
-                <div class="text-blue-100">Smart Reports</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- How It Works Section -->
-<div class="py-24 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16 animate-on-scroll">
-            <h2 class="text-5xl font-bold text-gray-900 mb-4">
-                How It Works
-            </h2>
-            <p class="text-xl text-gray-600">
-                Simple 3-step process to analyze your question papers
-            </p>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div class="text-center animate-on-scroll">
-                <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <span class="text-4xl">1️⃣</span>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-4">Upload Papers</h3>
-                <p class="text-gray-600">
-                    Upload your PDF question papers. Our OCR handles scanned documents too.
-                </p>
-            </div>
-            
-            <div class="text-center animate-on-scroll" style="animation-delay: 0.1s;">
-                <div class="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <span class="text-4xl">2️⃣</span>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-4">AI Analysis</h3>
-                <p class="text-gray-600">
-                    AI extracts questions, classifies by module, and clusters by semantic similarity.
-                </p>
-            </div>
-            
-            <div class="text-center animate-on-scroll" style="animation-delay: 0.2s;">
-                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <span class="text-4xl">3️⃣</span>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-4">Study Smart</h3>
-                <p class="text-gray-600">
-                    View priority rankings, generate reports, and focus on high-frequency topics.
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- CTA Section -->
-<div class="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
-    <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8 animate-on-scroll">
-        <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to Study Smarter?
-        </h2>
-        <p class="text-xl text-blue-100 mb-8">
-            Join thousands of students using AI to ace their exams
-        </p>
-        {% if user.is_authenticated %}
-        <a href="{% url 'analytics:subject_list' %}" 
-           class="bg-white text-purple-600 px-10 py-4 rounded-xl text-lg font-bold shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 inline-block">
-            Go to Dashboard →
-        </a>
-        {% else %}
-        <a href="{% url 'users:register' %}" 
-           class="bg-white text-purple-600 px-10 py-4 rounded-xl text-lg font-bold shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 inline-block">
-            Get Started Free →
-        </a>
-        {% endif %}
     </div>
 </div>
 {% endblock %}

@@ -40,6 +40,12 @@ class Paper(SoftDeleteModel):
     processing_error = models.TextField(blank=True)
     processed_at = models.DateTimeField(null=True, blank=True)
     
+    # Detailed progress tracking
+    status_detail = models.CharField(max_length=255, blank=True, help_text='Current operation detail')
+    questions_extracted = models.PositiveIntegerField(default=0, help_text='Number of questions extracted')
+    questions_classified = models.PositiveIntegerField(default=0, help_text='Number of questions classified')
+    progress_percent = models.PositiveIntegerField(default=0, help_text='Overall progress percentage')
+    
     # Extracted text (cached)
     raw_text = models.TextField(blank=True)
     

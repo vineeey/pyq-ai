@@ -1,12 +1,17 @@
 """URL patterns for papers app."""
 from django.urls import path
-from . import views
+from . import views, api_views
 
 app_name = 'papers'
 
 urlpatterns = [
     # Public upload - no authentication required
     path('upload/', views.GenericPaperUploadView.as_view(), name='upload_generic'),
+    
+    # API endpoints for processing
+    path('api/start-processing/', api_views.StartProcessingView.as_view(), name='start_processing'),
+    path('api/paper/<uuid:paper_id>/status/', api_views.PaperStatusView.as_view(), name='paper_status'),
+    path('api/subject/<uuid:subject_id>/status/', api_views.SubjectStatusView.as_view(), name='subject_status'),
     
     # Subject-specific views
     path('subject/<uuid:subject_pk>/', views.PaperListView.as_view(), name='list'),

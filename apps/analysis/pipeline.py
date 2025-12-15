@@ -88,6 +88,12 @@ class AnalysisPipeline:
             job.status_detail = 'Reading PDF file...'
             job.save()
             
+            # Update paper status
+            paper.status = Paper.ProcessingStatus.PROCESSING
+            paper.status_detail = 'Extracting text from PDF...'
+            paper.progress_percent = 5
+            paper.save()
+            
             try:
                 questions_data, images = self.pymupdf_extractor.extract_questions_with_images(
                     paper.file.path
@@ -96,6 +102,9 @@ class AnalysisPipeline:
                 # Store extracted text
                 paper.raw_text = self.pymupdf_extractor.extract_text(paper.file.path)
                 paper.page_count = self.pymupdf_extractor.get_page_count(paper.file.path)
+                paper.status_detail = f'Extracted {len(questions_data)} questions'
+                paper.questions_extracted = len(questions_data)
+                paper.progress_percent = 20
                 paper.save()
                 
                 logger.info(f"PyMuPDF: Extracted {len(questions_data)} questions and {len(images)} images")

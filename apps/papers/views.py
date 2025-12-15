@@ -133,7 +133,7 @@ class GenericPaperUploadView(FormView):
                 )
                 continue
             
-            # Create paper
+            # Create paper (NO AUTO-PROCESSING)
             paper = Paper.objects.create(
                 subject=subject,
                 title=parsed['title'],
@@ -141,23 +141,17 @@ class GenericPaperUploadView(FormView):
                 exam_type=parsed['exam_type'],
                 file=uploaded_file,
                 file_hash=file_hash_hex,
+                status=Paper.ProcessingStatus.PENDING,
+                status_detail='Uploaded - Ready for processing'
             )
             uploaded_count += 1
             
-            # Queue background analysis task
-            try:
-                from apps.analysis.tasks import queue_paper_analysis
-                queue_paper_analysis(paper)
-            except Exception as e:
-                messages.warning(
-                    request,
-                    f'"{uploaded_file.name}" uploaded but analysis could not be queued: {str(e)}'
-                )
+            # DO NOT auto-process - user will trigger manually
         
         if uploaded_count > 0:
             messages.success(
                 request,
-                f'{uploaded_count} paper(s) uploaded successfully! Analysis has been queued.'
+                f'{uploaded_count} paper(s) uploaded successfully! Click "Start Processing" to begin analysis.'
             )
         
         return redirect(self.get_success_url())

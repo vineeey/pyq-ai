@@ -9,22 +9,26 @@
     <!-- Tailwind CSS -->
     <link href="{% static 'css/output.css' %}" rel="stylesheet">
     
-    <!-- Local JavaScript Libraries -->
-    <script src="{% static 'js/vendors/alpine-fallback.js' %}"></script>
-    <script src="{% static 'js/vendors/htmx-fallback.js' %}"></script>
-    <script src="{% static 'js/vendors/chart-fallback.js' %}"></script>
-    <script src="{% static 'js/vendors/lucide-fallback.js' %}"></script>
-    
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
     
-    {% block extra_head %}{% endblock %}
     {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-gray-50">
     
     <!-- Navigation -->
     {% include 'base/nav.html' %}
+    
+    <!-- Messages -->
+    {% if messages %}
+    <div class="fixed top-20 right-4 z-50 space-y-2">
+        {% for message in messages %}
+        <div class="alert-{{ message.tags }} animate-slide-left">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     
     <!-- Main Content -->
     <main class="min-h-screen">
@@ -34,9 +38,8 @@
     <!-- Footer -->
     {% include 'base/footer.html' %}
     
-    <!-- Main App JavaScript -->
+    <!-- JavaScript -->
     <script src="{% static 'js/app.js' %}"></script>
-    
     {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -4,10 +4,6 @@
 
 {% block title %}Analytics Dashboard - {{ subject.name }}{% endblock %}
 
-{% block extra_head %}
-<!-- Chart.js is loaded from base.html -->
-{% endblock %}
-
 {% block extra_css %}
 <style>
     .priority-indicator {
@@ -34,6 +30,11 @@
         margin: 0.25rem;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 </style>
 {% endblock %}
 
@@ -45,27 +46,35 @@
         <div class="mb-8 animate-slide-up">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h1 class="text-4xl font-bold text-gray-900 mb-2">
-                        {{ subject.name }}
-                    </h1>
-                    <p class="text-gray-600 text-lg">
-                        Repeated Question Analysis - {{ subject.code }}
+                    <div class="flex items-center gap-3 mb-2">
+                        <a href="{% url 'analytics:subject_list' %}" 
+                           class="text-gray-500 hover:text-gray-700 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                        </a>
+                        <h1 class="text-4xl font-bold text-gray-900">
+                            {{ subject.name }}
+                        </h1>
+                    </div>
+                    <p class="text-gray-600 ml-9">
+                        Repeated Question Analysis - {{ subject.code|default:"" }}
                     </p>
                 </div>
                 <div class="flex gap-3">
-                    <a href="{% url 'reports:subject_report_pdf' subject.id %}" 
-                       class="btn-primary no-print">
-                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{% url 'reports:list' subject.pk %}" 
+                       class="btn-primary no-print flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        Generate PDF Report
+                        Generate Reports
                     </a>
-                    <a href="{% url 'analytics:subject_list' %}" 
-                       class="btn-secondary no-print">
-                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{% url 'subjects:detail' subject.pk %}" 
+                       class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors no-print flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
-                        Back to Subjects
+                        Back to Subject
                     </a>
                 </div>
             </div>
@@ -83,7 +92,7 @@
                 </div>
             </div>
             
-            <div class="stats-card from-orange-500 to-orange-600 animate-slide-up animate-delay-100">
+            <div class="stats-card from-orange-500 to-orange-600 animate-slide-up" style="animation-delay: 0.1s;">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-orange-100 text-sm font-medium">🔥🔥 High Priority</p>
@@ -93,7 +102,7 @@
                 </div>
             </div>
             
-            <div class="stats-card from-yellow-500 to-yellow-600 animate-slide-up animate-delay-200">
+            <div class="stats-card from-yellow-500 to-yellow-600 animate-slide-up" style="animation-delay: 0.2s;">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-yellow-100 text-sm font-medium">🔥 Medium Priority</p>
@@ -103,7 +112,7 @@
                 </div>
             </div>
             
-            <div class="stats-card from-green-500 to-green-600 animate-slide-up animate-delay-300">
+            <div class="stats-card from-green-500 to-green-600 animate-slide-up" style="animation-delay: 0.3s;">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-green-100 text-sm font-medium">✓ Low Priority</p>
@@ -115,6 +124,7 @@
         </div>
 
         <!-- Module Filter -->
+        {% if modules %}
         <div class="bg-white rounded-xl shadow-md p-6 mb-8 animate-slide-up no-print">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Filter by Module</h2>
             <div class="flex flex-wrap gap-3">
@@ -130,6 +140,7 @@
                 {% endfor %}
             </div>
         </div>
+        {% endif %}
 
         <!-- Search Box -->
         <div class="bg-white rounded-xl shadow-md p-4 mb-8 animate-slide-up no-print">
@@ -145,6 +156,7 @@
         </div>
 
         <!-- Clusters by Module -->
+        {% if modules %}
         {% for module in modules %}
         <div class="mb-12 animate-slide-up animate-on-scroll" id="module-{{ module.id }}">
             <div class="card">
@@ -153,7 +165,7 @@
                         <h2 class="text-2xl font-bold">
                             Module {{ module.number }}: {{ module.name }}
                         </h2>
-                        <a href="{% url 'reports:module_report_pdf' module.id %}" 
+                        <a href="{% url 'reports:module_report' subject.pk module.number %}" 
                            class="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-50 transition-colors no-print">
                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -236,6 +248,7 @@
             </div>
         </div>
         {% endfor %}
+        {% endif %}
 
         <!-- Empty State -->
         {% if not clusters_by_module %}
@@ -246,7 +259,7 @@
                 </svg>
                 <h3 class="text-2xl font-bold text-gray-700 mb-2">No Analysis Data Available</h3>
                 <p class="text-gray-500 mb-6">Start by analyzing papers to see repeated question patterns.</p>
-                <a href="{% url 'papers:upload' %}" class="btn-primary">
+                <a href="{% url 'papers:upload_generic' %}" class="btn-primary">
                     Upload Papers
                 </a>
             </div>
@@ -259,7 +272,7 @@
 
 {% block extra_js %}
 <script>
-    // Add custom get_item template filter functionality if needed
+    // Add custom initialization if needed
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize animations for clusters
         const clusters = document.querySelectorAll('.cluster-item');
